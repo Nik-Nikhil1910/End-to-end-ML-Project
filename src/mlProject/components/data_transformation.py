@@ -76,8 +76,8 @@ class DataTransformation:
         # Convert inputs to DataFrames
         x_train_df = pd.DataFrame(x_train)
         x_test_df = pd.DataFrame(x_test)
-        y_train_df = pd.DataFrame(y_train, columns=['target'])  # Naming the column for clarity
-        y_test_df = pd.DataFrame(y_test, columns=['target'])    # Naming the column for clarity
+        y_train_df = pd.DataFrame(y_train)
+        y_test_df = pd.DataFrame(y_test)  
     
         # Reset indices to avoid issues with concatenation
         x_train_df.reset_index(drop=True, inplace=True)
@@ -86,6 +86,7 @@ class DataTransformation:
         y_test_df.reset_index(drop=True, inplace=True)
     
         # Concatenate features and target columns
+        
         train_transformed = pd.concat([x_train_df, y_train_df], axis=1)
         test_transformed = pd.concat([x_test_df, y_test_df], axis=1)
     
