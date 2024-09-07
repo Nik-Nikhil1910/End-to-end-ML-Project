@@ -13,9 +13,9 @@ class DataTransformationTrainingPipeline:
         config = ConfigurationManager()
         data_transformation_config = config.get_data_Transformation_config()
         data_transformation = DataTransformation(config=data_transformation_config)
-        transformed_data=data_transformation.remove_skewness()
-        x_train, x_test, y_train, y_test=data_transformation.train_test_splitting(transformed_data)
-        X_train_scaled, X_test_scaled=data_transformation.scaler(x_train, x_test)
+        x_train, x_test, y_train, y_test=data_transformation.train_test_splitting()
+        unskewed_x_train,unskewed_x_test=data_transformation.remove_skewness(x_train, x_test)
+        X_train_scaled, X_test_scaled=data_transformation.scaler(unskewed_x_train,unskewed_x_test)
         data_transformation.to_write(X_train_scaled, y_train, X_test_scaled, y_test)
         
  

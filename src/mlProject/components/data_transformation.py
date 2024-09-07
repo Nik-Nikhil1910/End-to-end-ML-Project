@@ -10,31 +10,12 @@ class DataTransformation:
     def __init__(self, config):
         self.config = config
 
-   
-    
-    def remove_skewness(self, skew_threshold=0.75)->pd.DataFrame:
-        """
-        Applies log transformation to skewed features in the dataset.
-        
-        We will read the file here as it will be the first step of our data transformation
-        """
+
+    def train_test_splitting(self):
         original_data = pd.read_csv(self.config.data_path)
         
         # Copy the original data to avoid modifying it directly
-        data_transformed = original_data.copy()
-
-        # Identify skewed features
-        skewed_features = data_transformed.skew().index[data_transformed.skew() > skew_threshold]
-        
-        for feature in skewed_features:
-            # Apply log transformation
-            data_transformed[feature] = data_transformed[feature].apply(lambda x: np.log1p(x) if x >= 0 else np.nan)
-            
-        return data_transformed
-
-
-
-    def train_test_splitting(self,data):
+        data = original_data.copy()
         
         # Assuming the last column is the target
         X = data.iloc[:, :-1]  # Features
@@ -60,6 +41,26 @@ class DataTransformation:
         return x_train, x_test, y_train, y_test
 
 
+    
+    def remove_skewness(self,x_train, x_test, skew_threshold=0.75)->pd.DataFrame:
+        """
+        Applies log transformation to skewed features in the dataset.
+        
+        We will read the file here as it will be the first step of our data transformation
+        """
+
+        # Identify skewed features
+        skewed_features = x_train.skew().index[x_train.skew() > skew_threshold]
+        
+        
+        for feature in skewed_features:
+            # Apply log transformation
+            x_train[feature] = x_train[feature].apply(lambda x: np.log1p(x) if x >= 0 else np.nan)
+            x_test[feature] = x_test[feature].apply(lambda x: np.log1p(x) if x >= 0 else np.nan)
+            
+        return x_train,x_test
+    
+    
 
     def scaler(self, x_train, x_test):
         column_names = x_train.columns
@@ -77,16 +78,15 @@ class DataTransformation:
         x_train_df = pd.DataFrame(x_train)
         x_test_df = pd.DataFrame(x_test)
         y_train_df = pd.DataFrame(y_train)
-        y_test_df = pd.DataFrame(y_test)  
+        y_test_df = pd.DataFrame(y_test)
     
         # Reset indices to avoid issues with concatenation
         x_train_df.reset_index(drop=True, inplace=True)
         y_train_df.reset_index(drop=True, inplace=True)
         x_test_df.reset_index(drop=True, inplace=True)
         y_test_df.reset_index(drop=True, inplace=True)
-    
+        print(y_train_df.head())
         # Concatenate features and target columns
-        
         train_transformed = pd.concat([x_train_df, y_train_df], axis=1)
         test_transformed = pd.concat([x_test_df, y_test_df], axis=1)
     
@@ -95,4 +95,5 @@ class DataTransformation:
         test_transformed.to_csv(os.path.join(self.config.root_dir, "transformed_test_data.csv"), index=False)
     
         logger.info("Data has been transformed and saved to CSV files")
+    
     
