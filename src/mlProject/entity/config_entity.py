@@ -18,10 +18,11 @@ class DataValidationConfig:
     all_schema: dict
     
     
-@dataclass(frozen=True)
+@dataclass
 class DataTransformationConfig:
-    root_dir: Path
-    data_path: Path
+    root_dir: str
+    data_path: str
+    preprocessing_steps: list
     
     
 

@@ -17,9 +17,13 @@ data_validation:
 
 
 data_transformation:
-  root_dir: artifacts/data_transformation
-  data_path: artifacts/data_ingestion/WineQT.csv
-
+  root_dir: "artifacts/data_transformation"
+  data_path: "artifacts/data_ingestion/WineQT.csv"
+  preprocessing_steps:
+    - name: "scaler"
+      type: "StandardScaler"
+    - name: "log_transform"
+      type: "LogTransform"  # A new entry for log transformation
 
 
 model_trainer:
