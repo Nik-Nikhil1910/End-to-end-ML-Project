@@ -18,7 +18,7 @@ class DataValidationConfig:
     all_schema: dict
     
     
-@dataclass
+@dataclass(frozen=True)
 class DataTransformationConfig:
     root_dir: str
     data_path: str
