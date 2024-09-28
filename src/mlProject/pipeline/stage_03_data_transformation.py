@@ -3,6 +3,7 @@ from src.mlProject.components.data_transformation import DataTransformation
 from src.mlProject import logger
 import joblib
 import os
+import numpy as np
 
 STAGE_NAME = "Data Transformation Stage"
 
@@ -22,29 +23,22 @@ class DataTransformationTrainingPipeline:
         # Step 3: Split the Data
         x_train, x_test, y_train, y_test = data_transformation.train_test_splitting()
         
-        # Step 4: Apply Log Transform to Remove Skewness
-        unskewed_x_train, unskewed_x_test = data_transformation.log_transform(x_train, x_test)
-        
-        # Step 5: Scale Data (Fit and Save Preprocessing Pipeline)
-        X_train_scaled, X_test_scaled = data_transformation.scaler(unskewed_x_train, unskewed_x_test)
-        
-        # Step 6: Save Transformed Data to CSV Files
-        data_transformation.to_write(X_train_scaled, y_train, X_test_scaled, y_test)
+        # Step 4: Apply Transformations
+        train_data,test_data = data_transformation.apply_transforms(x_train,x_test,y_train,y_test)
 
-        # Step 7: Optionally Load and Use the Saved Pipeline for Future Predictions
-        self.load_and_use_pipeline(data_transformation_config.root_dir, unskewed_x_test)
-    
+
     def load_and_use_pipeline(self, root_dir, new_data):
         """
         Load the saved data transformation pipeline and apply it to new data.
         """
-        pipeline_path = os.path.join(root_dir, "data_preprocessing_pipeline.pkl")  # Use correct pipeline filename
+        log_transformed_data=np.log1p(new_data)
+        pipeline_path = os.path.join(root_dir, "standard_scaler.pkl")  # Use correct pipeline filename
         
         if os.path.exists(pipeline_path):
             logger.info(f"Loading pipeline from {pipeline_path}")
             preprocessing_pipeline = joblib.load(pipeline_path)  # Load the saved pipeline
             # Apply the pipeline to the new data
-            new_data_scaled = preprocessing_pipeline.transform(new_data)
+            new_data_scaled = preprocessing_pipeline.transform(log_transformed_data)
             logger.info("Data has been scaled using the loaded pipeline.")
             # Further processing with new_data_scaled (predictions, saving, etc.)
         else:
