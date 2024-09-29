@@ -5,8 +5,6 @@ import pandas as pd
 import numpy as np
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 from mlProject import logger
 from sklearn.model_selection import train_test_split
 from mlProject.entity.config_entity import DataTransformationConfig
@@ -21,17 +19,8 @@ class DataTransformation:
 
     # I am only adding train_test_spliting cz this data is already cleaned up
     
-        self.config = config
-        self.preprocessing_steps=config.preprocessing_steps
-    
-    ## Note: You can add different data transformation techniques such as Scaler, PCA and all
-    #You can perform all kinds of EDA in ML cycle here before passing this data to the model
-
-    # I am only adding train_test_spliting cz this data is already cleaned up
-    
     def train_test_splitting(self):
         # Load the data from the path provided in the config
-        data = pd.read_csv(self.config.data_path) 
         data = pd.read_csv(self.config.data_path) 
         
         # Assuming the last column is the target
@@ -46,12 +35,6 @@ class DataTransformation:
 
         # Create directory if it doesn't exist
         os.makedirs(self.config.root_dir, exist_ok=True)
-         # Combine the features and target for both train and test sets
-        train_data = pd.concat([x_train, y_train], axis=1)
-        test_data = pd.concat([x_test, y_test], axis=1)
-
-        # Create directory if it doesn't exist
-        os.makedirs(self.config.root_dir, exist_ok=True)
 
         # Save the train and test data to CSV files
         train_file_path = os.path.join(self.config.root_dir, "train_data.csv")
@@ -59,15 +42,7 @@ class DataTransformation:
 
         train_data.to_csv(train_file_path, index=False)
         test_data.to_csv(test_file_path, index=False)
-        # Save the train and test data to CSV files
-        train_file_path = os.path.join(self.config.root_dir, "train_data.csv")
-        test_file_path = os.path.join(self.config.root_dir, "test_data.csv")
 
-        train_data.to_csv(train_file_path, index=False)
-        test_data.to_csv(test_file_path, index=False)
-
-        logger.info(f"Training data saved to {train_file_path}")
-        logger.info(f"Test data saved to {test_file_path}")
         logger.info(f"Training data saved to {train_file_path}")
         logger.info(f"Test data saved to {test_file_path}")
 
@@ -92,38 +67,13 @@ class DataTransformation:
 
         # Fit and transform the data
         scaled_data = scaler.fit_transform(data)
-    
-    def log_transform(self,data):
-        return np.log1p(data)
-        
-    def scaler(self, data):
-        """
-        Scales the input data using StandardScaler and saves the fitted scaler.
 
-        Parameters:
-        - data: DataFrame or array-like object to be scaled.
-
-        Returns:
-        - Scaled data after applying standard scaling.
-        """
-        # Initialize the scaler
-        scaler = StandardScaler()
-
-        # Fit and transform the data
-        scaled_data = scaler.fit_transform(data)
-
-        # Save the fitted scaler to a file
-        scaler_path = os.path.join(self.config.root_dir, "standard_scaler.pkl")
-        joblib.dump(scaler, scaler_path)
         # Save the fitted scaler to a file
         scaler_path = os.path.join(self.config.root_dir, "standard_scaler.pkl")
         joblib.dump(scaler, scaler_path)
 
         logger.info(f"Fitted scaler saved at: {scaler_path}")
-        logger.info(f"Fitted scaler saved at: {scaler_path}")
 
-        # Create DataFrame for the scaled data
-        scaled_data_df = pd.DataFrame(scaled_data, columns=data.columns)
         # Create DataFrame for the scaled data
         scaled_data_df = pd.DataFrame(scaled_data, columns=data.columns)
 
@@ -169,7 +119,23 @@ class DataTransformation:
         train_data.to_csv(train_file_path, index=False)
         test_data.to_csv(test_file_path, index=False)
 
+        
+        # Path to the metadata file
+        metadata_file_path = os.path.join(self.config.root_dir, 'model_metadata.json')
+
+        # Save preprocessing steps in a metadata file at the root directory
+        with open(metadata_file_path, 'w') as f:
+            json.dump({'preprocessing_steps': self.preprocessing_steps}, f)
+
+        # Log that the metadata file has been saved
+        logger.info(f"Model metadata saved at: {metadata_file_path}")
+
         logger.info(f"Transformed training data saved to {train_file_path}")
         logger.info(f"Transformed test data saved to {test_file_path}")
 
         return train_data, test_data
+
+    
+    
+                
+    
