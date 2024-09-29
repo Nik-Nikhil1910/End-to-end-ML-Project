@@ -1,5 +1,6 @@
 import joblib
 import os
+import json
 import pandas as pd
 import numpy as np
 from sklearn.pipeline import Pipeline
@@ -117,6 +118,17 @@ class DataTransformation:
 
         train_data.to_csv(train_file_path, index=False)
         test_data.to_csv(test_file_path, index=False)
+
+        
+        # Path to the metadata file
+        metadata_file_path = os.path.join(self.config.root_dir, 'model_metadata.json')
+
+        # Save preprocessing steps in a metadata file at the root directory
+        with open(metadata_file_path, 'w') as f:
+            json.dump({'preprocessing_steps': self.preprocessing_steps}, f)
+
+        # Log that the metadata file has been saved
+        logger.info(f"Model metadata saved at: {metadata_file_path}")
 
         logger.info(f"Transformed training data saved to {train_file_path}")
         logger.info(f"Transformed test data saved to {test_file_path}")

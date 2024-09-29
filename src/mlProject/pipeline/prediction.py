@@ -2,7 +2,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from src.mlProject.utils.common import read_yaml, create_directories
+from src.mlProject.utils.common import read_yaml, create_directories , load_json
 from src.mlProject.constants import *
 import logging
 
@@ -23,9 +23,10 @@ class PredictionPipeline:
         
         # Load the trained model
         self.model = joblib.load(Path('artifacts/model_trainer/model.joblib'))
+        self.preprocessing_steps=load_json(Path("artifacts/data_transformation/model_metadata.json"))
         
         # Load the preprocessing pipeline (log transform and scaler) used during training
-        self.preprocessing_pipeline = joblib.load(Path('artifacts/data_transformation/data_preprocessing_pipeline.pkl'))
+        self.preprocessing_pipeline = joblib.load(Path('artifacts/data_transformation/standard_scaler.pkl'))
 
     def transform_user_input(self, data):
         """
@@ -44,9 +45,15 @@ class PredictionPipeline:
         # Debugging: Log input data
         logger.info("Input Data Preview:")
         logger.info("\n%s", data.head())
-    
+        
+        step_list = self.preprocessing_steps["preprocessing_steps"]
+        transformed_data=data
         # Apply the loaded preprocessing pipeline to the input data
-        transformed_data = self.preprocessing_pipeline.transform(data)
+        for step in step_list:
+            if step["name"]=="log_transform":
+                transformed_data=np.log1p(transformed_data)
+            elif step["name"]=="scaler":
+                transformed_data = self.preprocessing_pipeline.transform(data)
 
         # Convert transformed data back to DataFrame for consistency
         transformed_data_df = pd.DataFrame(transformed_data, columns=self.feature_names)
@@ -55,9 +62,6 @@ class PredictionPipeline:
         logger.info("Transformed Data Preview:")
         logger.info("\n%s", transformed_data_df.head())
     
-        # Write the DataFrame to a CSV file
-        file_path = Path("artifacts/data_transformation/transformed_prediction_data.csv")
-        transformed_data_df.to_csv(file_path, index=False)
     
         return transformed_data_df
     
