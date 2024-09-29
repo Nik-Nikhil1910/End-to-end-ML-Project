@@ -34,9 +34,13 @@ class PredictionPipeline:
         that was used during model training.
         """
         # Ensure the input data has the correct column names and is a DataFrame
+        # Ensure the input data has the correct column names and is a DataFrame
         if isinstance(data, np.ndarray):
             data = pd.DataFrame(data, columns=self.feature_names)
         elif isinstance(data, pd.DataFrame):
+            if set(data.columns) != set(self.feature_names):
+                logger.error("Input DataFrame columns do not match expected columns: %s", self.feature_names)
+                raise ValueError(f"Input DataFrame columns do not match expected columns: {self.feature_names}")
             if set(data.columns) != set(self.feature_names):
                 logger.error("Input DataFrame columns do not match expected columns: %s", self.feature_names)
                 raise ValueError(f"Input DataFrame columns do not match expected columns: {self.feature_names}")
@@ -62,6 +66,9 @@ class PredictionPipeline:
         logger.info("Transformed Data Preview:")
         logger.info("\n%s", transformed_data_df.head())
     
+        # Write the DataFrame to a CSV file
+        file_path = Path("artifacts/data_transformation/transformed_prediction_data.csv")
+        transformed_data_df.to_csv(file_path, index=False)
     
         return transformed_data_df
     
