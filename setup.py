@@ -1,6 +1,6 @@
 import setuptools
 
-with open("C:/Users/asus/OneDrive/Desktop/Pandas app/End-to-end-ML-Project/README.md", "r", encoding="utf-8") as f:
+with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 
