@@ -11,3 +11,4 @@ types-PyYAML
 Flask
 Flask-Cors
 -e .
+xgboost
